@@ -1,0 +1,11 @@
+@model RazorPagesMovie.Models.Movie
+
+@if (!string.IsNullOrEmpty(Model.PosterPath))
+{
+    <div class="mb-3">
+        <img src="~/posters/@Model.PosterPath"
+             alt="@Model.Title poster"
+             class="img-fluid rounded"
+             style="max-width:300px;" />
+    </div>
+}

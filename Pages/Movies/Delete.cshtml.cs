@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.RazorPages;
 using Microsoft.EntityFrameworkCore;
@@ -12,11 +8,13 @@ namespace RazorPagesMovie.Pages_Movies
 {
     public class DeleteModel : PageModel
     {
-        private readonly RazorPagesMovie.Data.RazorPagesMovieContext _context;
+        private readonly RazorPagesMovieContext _context;
+        private readonly IWebHostEnvironment _environment;
 
-        public DeleteModel(RazorPagesMovie.Data.RazorPagesMovieContext context)
+        public DeleteModel(RazorPagesMovieContext context, IWebHostEnvironment environment)
         {
             _context = context;
+            _environment = environment;
         }
 
         [BindProperty]
@@ -29,16 +27,15 @@ namespace RazorPagesMovie.Pages_Movies
                 return NotFound();
             }
 
-            var movie = await _context.Movie.FirstOrDefaultAsync(m => m.Id == id);
+            Movie? movie = await _context.Movie.FirstOrDefaultAsync(m => m.Id == id);
 
-            if (movie is not null)
+            if (movie == null)
             {
-                Movie = movie;
-
-                return Page();
+                return NotFound();
             }
 
-            return NotFound();
+            Movie = movie;
+            return Page();
         }
 
         public async Task<IActionResult> OnPostAsync(int? id)
@@ -48,12 +45,24 @@ namespace RazorPagesMovie.Pages_Movies
                 return NotFound();
             }
 
-            var movie = await _context.Movie.FindAsync(id);
+            Movie? movie = await _context.Movie.FindAsync(id);
+
             if (movie != null)
             {
-                Movie = movie;
-                _context.Movie.Remove(Movie);
+                string? posterPath = movie.PosterPath;
+
+                _context.Movie.Remove(movie);
                 await _context.SaveChangesAsync();
+
+                // Delete the file only after the database delete succeeded
+                if (!string.IsNullOrEmpty(posterPath))
+                {
+                    string filePath = Path.Combine(_environment.WebRootPath, "posters", posterPath);
+                    if (System.IO.File.Exists(filePath))
+                    {
+                        System.IO.File.Delete(filePath);
+                    }
+                }
             }
 
             return RedirectToPage("./Index");
