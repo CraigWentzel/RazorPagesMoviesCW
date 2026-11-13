@@ -1,8 +1,7 @@
-
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-
+namespace RazorPagesMovie.Models;
 
 public class Movie
 {
@@ -31,5 +30,5 @@ public class Movie
     [Required]
     public string Rating { get; set; } = string.Empty;
 
-    public string? PosterPath {get; set;} 
+    public string? PosterPath { get; set; }
 }

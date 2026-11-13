@@ -6,3 +6,7 @@ obj/
 
 *.db-shm
 *.db-wal
+
+wwwroot/posters/*
+!wwwroot/posters/.gitkeep
+RazorPagesMovieContext.db
